@@ -12,6 +12,7 @@ import (
 
 	"github.com/danielmiessler/fabric/plugins/ai/bedrock"
 	"github.com/danielmiessler/fabric/plugins/ai/exolab"
+	"github.com/danielmiessler/fabric/plugins/ai/perplexity" // Added Perplexity plugin
 	"github.com/danielmiessler/fabric/plugins/strategy"
 
 	"github.com/samber/lo"
@@ -41,7 +42,9 @@ import (
 // potential authentication source exists so we can safely initialize the
 // Bedrock client without causing the AWS SDK to search for credentials.
 func hasAWSCredentials() bool {
-	if os.Getenv("AWS_ACCESS_KEY_ID") != "" && os.Getenv("AWS_SECRET_ACCESS_KEY") != "" {
+	if os.Getenv("AWS_PROFILE") != "" ||
+		os.Getenv("AWS_ROLE_SESSION_NAME") != "" ||
+		(os.Getenv("AWS_ACCESS_KEY_ID") != "" && os.Getenv("AWS_SECRET_ACCESS_KEY") != "") {
 		return true
 	}
 
@@ -91,6 +94,7 @@ func NewPluginRegistry(db *fsdb.Db) (ret *PluginRegistry, err error) {
 		anthropic.NewClient(),
 		lmstudio.NewClient(),
 		exolab.NewClient(),
+		perplexity.NewClient(), // Added Perplexity client
 	)
 
 	if hasAWSCredentials() {
